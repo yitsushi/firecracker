@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-x86_64:
-    name: build firecracker (x86_640)
+    name: build firecracker (x86_64)
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -39,6 +39,13 @@ jobs:
         arch: aarch64
         distro: ubuntu20.04
         run: |
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+            $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+          apt update
+          apt install docker-ce docker-ce-cli containerd.io
+
           tools/devtool -y build
           toolbox=$(uname -m)-unknown-linux-musl
           mkdir bin
