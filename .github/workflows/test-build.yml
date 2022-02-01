@@ -6,7 +6,7 @@ on:
 jobs:
   build-x86_64:
     name: build firecracker (x86_640)
-    runs-on: ubuntu20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
         retention-days: 1
   build-aarch64:
     name: build firecracker (aarch64)
-    runs-on: ubuntu20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
