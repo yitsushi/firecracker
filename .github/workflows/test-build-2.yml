@@ -48,6 +48,7 @@ jobs:
             librust-kvm-bindings-dev curl file git lsof openssh-client
           curl https://sh.rustup.rs -sSf \
             | sh -s -- -y --default-toolchain "1.52.1"
+          source $HOME/.cargo/env
           rustup target add aarch64-unknown-linux-musl
 
           cargo build \
