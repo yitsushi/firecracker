@@ -8,18 +8,18 @@ jobs:
     name: build firecracker (x86_64)
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+    - name: "Checkout"
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Build
+    - name: "Build"
       run: |
         tools/devtool -y build --release
         toolbox=$(uname -m)-unknown-linux-musl
         mkdir -p bin
         cp build/cargo_target/${toolbox}/release/firecracker bin/firecracker-$(uname -m)
         cp build/cargo_target/${toolbox}/release/jailer bin/jailer-$(uname -m)
-    - name: Store firecracker binaries
+    - name: "Store firecracker binaries"
       uses: actions/upload-artifact@v2
       with:
         name: firecracker-binaries
@@ -29,47 +29,47 @@ jobs:
     name: build firecracker (aarch64)
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+    - name: "Checkout"
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Setup Cache Cargo
+    - name: "Setup Cache Cargo"
       uses: actions/cache@v2.1.7
       with:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
         key: cargo-${{ hashFiles('**/Cargo.lock') }}
-    - name: Setup Rust: aarch64-unknown-linux-musl
+    - name: "Setup Rust: aarch64-unknown-linux-musl"
       uses: actions-rs/toolchain@v1.0.7
       with:
         toolchain: stable
         override: true
         profile: minimal
         target: aarch64-unknown-linux-musl
-    - name: Setup Rust: aarch64-unknown-linux-gnu
+    - name: "Setup Rust: aarch64-unknown-linux-gnu"
       uses: actions-rs/toolchain@v1.0.7
       with:
         toolchain: stable
         override: true
         profile: minimal
         target: aarch64-unknown-linux-gnu
-    - name: Build: seccompiler
+    - name: "Build: seccompiler"
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
         args: -p seccompiler --bin seccompiler-bin --target-dir build/seccompiler --target aarch64-unknown-linux-musl
-    - name: Build: firecracker
+    - name: "Build: firecracker"
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
         args: --release --target-dir build/cargo_target --target aarch64-unknown-linux-musl
-    - name: Build: jailer
+    - name: "Build: jailer"
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
         args: --release -p jailer --target-dir build/cargo_target --target aarch64-unknown-linux-musl
-    - name: Post Build | Prepare artifacts [-nix]
+    - name: "Post Build: Prepare artifacts"
       run: |
         mkdir -p bin
         cp \
@@ -78,7 +78,7 @@ jobs:
         cp \
           build/cargo_target/aarch64-unknown-linux-musl/release/jailer \
           bin/jailer-$(uname -m)
-    - name: Store firecracker binaries
+    - name: "Post build: Store firecracker binaries"
       uses: actions/upload-artifact@v2
       with:
         name: firecracker-binaries
