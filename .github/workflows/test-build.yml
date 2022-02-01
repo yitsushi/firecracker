@@ -10,20 +10,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        arch: [x86_64, aarch64]
+        - os: ubuntu-latest
+          arch: x86_64
+          platform: linux/amd64
+        - os: ubuntu-latest
+          arch: aarch64
+          platform: linux/arm64
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+      with:
+        image: ${{ matrix.image }}
+        platforms: ${{ matrix.platforms }}
     - name: Build
       run: |
-        tools/devtool -y build -- --target=${{ matrix.arch }}-unknown-linux-musl
-        toolbox=${{ matrix.arch }}-unknown-linux-musl
+        tools/devtool -y build
+        toolbox=$(uname -m)-unknown-linux-musl
         mkdir bin
-        cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-${{ matrix.arch }}
-        cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-${{ matrix.arch }}
+        cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
+        cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-$(uname -m)
     - name: Store firecracker binaries
       uses: actions/upload-artifact@v2
       with:
