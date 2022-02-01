@@ -14,7 +14,7 @@ jobs:
         fetch-depth: 0
     - name: Build
       run: |
-        tools/devtool -y build
+        tools/devtool -y build --release
         toolbox=$(uname -m)-unknown-linux-musl
         mkdir -p bin
         cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
@@ -33,27 +33,31 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Build
-      uses: uraimo/run-on-arch-action@v2.1.1
+    - name: Setup Cache Cargo
+      uses: actions/cache@v2.1.7
       with:
-        arch: aarch64
-        distro: ubuntu20.04
-        run: |
-          apt-get update
-          apt-get install -qy ca-certificates curl gnupg lsb-release
-
-          curl https://sh.rustup.rs -sSf -o /tmp/rust-setup
-          sh /tmp/rust-setup -y
-          source $HOME/.cargo/env
-
-          toolbox=$(uname -m)-unknown-linux-gnu
-
-          echo $toolbox
-
-          cargo build --target ${toolbox}
-          mkdir -p bin
-          cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
-          cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-$(uname -m)
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1.0.7
+      with:
+        toolchain: stable
+        override: true
+        profile: minimal
+        target: aarch64-unknown-linux-musl
+    - name: Build
+      uses: actions-rs/cargo@v1.0.3
+      with:
+        command: build
+        args: --release --locked --target aarch64-unknown-linux-musl
+    - name: Post Build | Prepare artifacts [-nix]
+      run: |
+        mkdir -p bin
+        cp \
+          build/cargo_target/aarch64-unknown-linux-musl/release/firecracker \
+          bin/firecracker-$(uname -m)
     - name: Store firecracker binaries
       uses: actions/upload-artifact@v2
       with:
