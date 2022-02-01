@@ -14,7 +14,6 @@ jobs:
         fetch-depth: 0
     - name: "Build"
       run: |
-        ls /dev/kvm
         tools/devtool -y build --release
         toolbox=$(uname -m)-unknown-linux-musl
         mkdir -p bin
@@ -62,12 +61,8 @@ jobs:
           gcc-aarch64-linux-gnu binutils-dev cmake g++ gcc \
           iperf3 iproute2 libbfd-dev libcurl4-openssl-dev libdw-dev \
           libfdt-dev libiberty-dev libssl-dev lsof make net-tools \
-          pkgconf zlib1g-dev tzdata xz-utils flex bison
-
-        cargo install cargo-kcov
-        cargo kcov --print-install-kcov-sh | sh
-
-        ls /dev/kvm
+          pkgconf zlib1g-dev tzdata xz-utils flex bison \
+          librust-kvm-bindings-dev
     - name: "Build: seccompiler"
       uses: actions-rs/cargo@v1.0.3
       with:
