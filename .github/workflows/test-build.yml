@@ -49,8 +49,8 @@ jobs:
           apt-get -q update
           apt-get install -qy docker-ce docker-ce-cli containerd.io
 
-          tools/devtool -y build
-          toolbox=$(uname -m)-unknown-linux-musl
+          toolbox=$(uname -m)-unknown-linux-gnu
+          tools/devtool -y build -- --target ${toolbox}
           mkdir bin
           cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
           cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-$(uname -m)
