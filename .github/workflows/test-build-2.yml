@@ -80,10 +80,10 @@ jobs:
     - name: "Post Build: Prepare artifacts"
       run: |
         mkdir -p bin
-        cp \
+        cp -v \
           build/cargo_target/aarch64-unknown-linux-musl/debug/firecracker \
           bin/firecracker-aarch64
-        cp \
+        cp -v \
           build/cargo_target/aarch64-unknown-linux-musl/debug/jailer \
           bin/jailer-aarch64
     - name: "Post build: Store firecracker binaries"
