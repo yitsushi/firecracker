@@ -1,4 +1,4 @@
-name: test-build
+name: test build
 
 on:
   workflow_dispatch: {}
@@ -18,16 +18,12 @@ jobs:
       with:
         fetch-depth: 0
     - name: Build
-      uses: uraimo/run-on-arch-action@v2
-      with:
-        arch: ${{ matrix.arch }}
-        distro: ${{ matrix.os }}
-        run: |
-          tools/devtool -y build
-          toolbox=$(uname -m)-unknown-linux-musl
-          mkdir bin
-          cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
-          cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-$(uname -m)
+      run: |
+        tools/devtool -y build -- --target=${{ matrix.arch }}-unknown-linux-musl
+        toolbox=${{ matrix.arch }}-unknown-linux-musl
+        mkdir bin
+        cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-${{ matrix.arch }}
+        cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-${{ matrix.arch }}
     - name: Store firecracker binaries
       uses: actions/upload-artifact@v2
       with:
