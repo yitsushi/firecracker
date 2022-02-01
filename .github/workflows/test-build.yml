@@ -1,9 +1,7 @@
-name: release
+name: test-build
 
 on:
-  push:
-    tags:
-      - "v*.*.*-macvtap"
+  workflow_dispatch: {}
 
 jobs:
   build:
