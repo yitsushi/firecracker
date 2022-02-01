@@ -16,7 +16,7 @@ jobs:
       run: |
         tools/devtool -y build
         toolbox=$(uname -m)-unknown-linux-musl
-        mkdir bin
+        mkdir -p bin
         cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
         cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-$(uname -m)
     - name: Store firecracker binaries
@@ -42,16 +42,16 @@ jobs:
           apt-get update
           apt-get install -qy ca-certificates curl gnupg lsb-release
 
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-            $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-          apt-get -q update
-          apt-get install -qy docker-ce docker-ce-cli containerd.io
+          curl https://sh.rustup.rs -sSf -o /tmp/rust-setup
+          sh /tmp/rust-setup -y
+          source $HOME/.cargo/env
 
           toolbox=$(uname -m)-unknown-linux-gnu
-          tools/devtool -y build -- --target ${toolbox}
-          mkdir bin
+
+          echo $toolbox
+
+          cargo build --target ${toolbox}
+          mkdir -p bin
           cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
           cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-$(uname -m)
     - name: Store firecracker binaries
