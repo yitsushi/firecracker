@@ -40,25 +40,35 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
         key: cargo-${{ hashFiles('**/Cargo.lock') }}
-    - name: Setup Rust
+    - name: Setup Rust: aarch64-unknown-linux-musl
       uses: actions-rs/toolchain@v1.0.7
       with:
         toolchain: stable
         override: true
         profile: minimal
         target: aarch64-unknown-linux-musl
-    - name: Setup Rust
+    - name: Setup Rust: aarch64-unknown-linux-gnu
       uses: actions-rs/toolchain@v1.0.7
       with:
         toolchain: stable
         override: true
         profile: minimal
         target: aarch64-unknown-linux-gnu
-    - name: Build
+    - name: Build: seccompiler
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
-        args: --release --locked --target aarch64-unknown-linux-musl
+        args: -p seccompiler --bin seccompiler-bin --target-dir build/seccompiler --target aarch64-unknown-linux-musl
+    - name: Build: firecracker
+      uses: actions-rs/cargo@v1.0.3
+      with:
+        command: build
+        args: --release --target-dir build/cargo_target --target aarch64-unknown-linux-musl
+    - name: Build: jailer
+      uses: actions-rs/cargo@v1.0.3
+      with:
+        command: build
+        args: --release -p jailer --target-dir build/cargo_target --target aarch64-unknown-linux-musl
     - name: Post Build | Prepare artifacts [-nix]
       run: |
         mkdir -p bin
