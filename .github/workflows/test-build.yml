@@ -40,13 +40,6 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
         key: cargo-${{ hashFiles('**/Cargo.lock') }}
-    - name: "Setup Rust: aarch64-unknown-linux-musl"
-      uses: actions-rs/toolchain@v1.0.7
-      with:
-        toolchain: stable
-        override: true
-        profile: minimal
-        target: aarch64-unknown-linux-musl
     - name: "Setup Rust: aarch64-unknown-linux-gnu"
       uses: actions-rs/toolchain@v1.0.7
       with:
@@ -63,25 +56,25 @@ jobs:
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
-        args: -p seccompiler --bin seccompiler-bin --target-dir build/seccompiler --target aarch64-unknown-linux-musl
+        args: -p seccompiler --bin seccompiler-bin --target-dir build/seccompiler --target aarch64-unknown-linux-gnu
     - name: "Build: firecracker"
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
-        args: --release --target-dir build/cargo_target --target aarch64-unknown-linux-musl
+        args: --release --target-dir build/cargo_target --target aarch64-unknown-linux-gnu
     - name: "Build: jailer"
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
-        args: --release -p jailer --target-dir build/cargo_target --target aarch64-unknown-linux-musl
+        args: --release -p jailer --target-dir build/cargo_target --target aarch64-unknown-linux-gnu
     - name: "Post Build: Prepare artifacts"
       run: |
         mkdir -p bin
         cp \
-          build/cargo_target/aarch64-unknown-linux-musl/release/firecracker \
+          build/cargo_target/aarch64-unknown-linux-gnu/release/firecracker \
           bin/firecracker-$(uname -m)
         cp \
-          build/cargo_target/aarch64-unknown-linux-musl/release/jailer \
+          build/cargo_target/aarch64-unknown-linux-gnu/release/jailer \
           bin/jailer-$(uname -m)
     - name: "Post build: Store firecracker binaries"
       uses: actions/upload-artifact@v2
