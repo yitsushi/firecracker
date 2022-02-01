@@ -18,7 +18,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Build
-      uses: actions/run-on-arch-action@v2
+      uses: uraimo/run-on-arch-action@v2
       with:
         arch: ${{ matrix.arch }}
         distro: ${{ matrix.os }}
