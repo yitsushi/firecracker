@@ -54,6 +54,11 @@ jobs:
         override: true
         profile: minimal
         target: aarch64-unknown-linux-gnu
+    - name: "Install extra dependencies"
+      run: |
+        apt-get --quiet update
+        apt-get --quiet --yes install \
+          gcc-aarch64-linux-gnu
     - name: "Build: seccompiler"
       uses: actions-rs/cargo@v1.0.3
       with:
