@@ -67,7 +67,7 @@ jobs:
       uses: actions-rs/cargo@v1.0.3
       with:
         command: build
-        args: -p seccompiler --bin seccompiler-bin --target-dir build/seccompiler --target aarch64-unknown-linux-musl
+        args: -p seccompiler --release --bin seccompiler-bin --target-dir build/seccompiler --target aarch64-unknown-linux-musl
     - name: "Build: firecracker"
       uses: actions-rs/cargo@v1.0.3
       with:
