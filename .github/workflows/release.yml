@@ -6,20 +6,89 @@ on:
       - "v*.*.*-macvtap"
 
 jobs:
-  build:
+  build-x86_64:
+    name: build firecracker (x86_64)
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+    - name: "Checkout"
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Build
+    - name: "Build"
       run: |
         tools/devtool -y build
         toolbox=$(uname -m)-unknown-linux-musl
-        mkdir bin
-        cp build/cargo_target/${toolbox}/debug/{firecracker,jailer} bin/
-    - name: Store firecracker binaries
+        mkdir -p bin
+        cp build/cargo_target/${toolbox}/debug/firecracker bin/firecracker-$(uname -m)
+        cp build/cargo_target/${toolbox}/debug/jailer bin/jailer-$(uname -m)
+    - name: "Store firecracker binaries"
+      uses: actions/upload-artifact@v2
+      with:
+        name: firecracker-binaries
+        path: bin/*
+        retention-days: 1
+  build-aarch64:
+    name: build firecracker (aarch64)
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: "Build"
+      uses: uraimo/run-on-arch-action@v2.1.1
+      with:
+        arch: aarch64
+        distro: ubuntu20.04
+        run: |
+          echo "::group::Install dependencies"
+          apt-get --quiet update
+          apt-get --quiet --yes install \
+            binutils-dev cmake g++ gcc \
+            iperf3 iproute2 libbfd-dev libcurl4-openssl-dev libdw-dev \
+            libfdt-dev libiberty-dev libssl-dev lsof make net-tools \
+            pkgconf zlib1g-dev tzdata xz-utils flex bison \
+            librust-kvm-bindings-dev curl file git lsof openssh-client
+          echo "::endgroup::"
+
+          echo "::group::Set up Rust"
+          curl https://sh.rustup.rs -sSf \
+            | sh -s -- -y --default-toolchain "1.52.1"
+          source $HOME/.cargo/env
+          rustup target add aarch64-unknown-linux-musl
+          echo "::endgroup::"
+
+          echo "::group::Build seccompiler"
+          cargo build \
+            -p seccompiler \
+            --bin seccompiler-bin \
+            --target-dir build/seccompiler \
+            --target aarch64-unknown-linux-musl
+          echo "::endgroup::"
+
+          echo "::group::Build firecracker"
+          cargo build \
+            --target-dir build/cargo_target \
+            --target aarch64-unknown-linux-musl
+          echo "::endgroup::"
+
+          echo "::group::Build jailer"
+          cargo build \
+            -p jailer \
+            --target-dir build/cargo_target \
+            --target aarch64-unknown-linux-musl
+          echo "::endgroup::"
+
+    - name: "Post Build: Prepare artifacts"
+      run: |
+        mkdir -p bin
+        cp -v \
+          build/cargo_target/aarch64-unknown-linux-musl/debug/firecracker \
+          bin/firecracker-aarch64
+        cp -v \
+          build/cargo_target/aarch64-unknown-linux-musl/debug/jailer \
+          bin/jailer-aarch64
+    - name: "Post build: Store firecracker binaries"
       uses: actions/upload-artifact@v2
       with:
         name: firecracker-binaries
@@ -46,5 +115,5 @@ jobs:
         fail_on_unmatched_files: true
         body: "See https://github.com/firecracker-microvm/firecracker/releases for latest release notes"
         files: |
-          bin/firecracker
-          bin/jailer
+          bin/firecracker*
+          bin/jailer*
